@@ -1,0 +1,136 @@
+
+References
+
+https://www.rechberger.io/tutorial-install-docker-using-ansible-on-a-remote-server/
+https://www.tecmint.com/ctop-monitor-docker-containers/
+https://www.reddit.com/r/devops/comments/9pmd4n/add_docker_gpg_key_using_ansible/
+https://github.com/dwdraju/ansible-install-docker/blob/master/tasks/main.yml
+https://docs.docker.com/compose/install/
+https://www.reddit.com/r/docker/comments/dsr6y2/containerdio_vs_dockercecli_vs_dockerce_what_are/
+https://www.tecmint.com/ctop-monitor-docker-containers/
+https://docs.docker.com/install/linux/docker-ce/ubuntu/
+https://stackoverflow.com/questions/59384708/ansible-returns-with-failed-to-import-the-required-python-library-docker-sdk-f
+https://www.digitalocean.com/community/tutorials/how-to-use-ansible-to-install-and-set-up-docker-on-ubuntu-18-04
+
+
+Code Samples
+https://github.com/dwdraju/ansible-install-docker/blob/master/tasks/main.yml
+https://github.com/nickjj/ansible-docker
+https://gist.github.com/deviantony/2b5078fe1675a5fedabf1de3d1f2652a
+
+Testing
+https://www.ansible.com/blog/testing-ansible-roles-with-docker
+
+
+Docker and ansible
+ https://github.com/ansible/ansible-container/issues/619
+
+ 
+TO DO
+
+ Read up on Ansible roles
+
+Notes
+
+apt-get
+ state: present only ensures that an entity with that name/type exists, and does not update it if the entity is found.
+ state: latest ensures that the content is actually updated too.
+
+--------------
+
+Debugging json variables in ansible
+
+ - name: Print returned json dictionary
+     debug:
+       var: data.json
+
+   - name: Print certain element
+     debug:
+       var: data.json[0].address.city
+
+-----------------
+
+Checking for error conditions
+
+https://docs.ansible.com/ansible/latest/user_guide/playbooks_error_handling.html
+
+- name: example of many failed_when conditions with OR
+  shell: "./myBinary"
+  register: ret
+  failed_when: >
+    ("No such file or directory" in ret.stdout) or
+    (ret.stderr != '') or
+    (ret.rc == 10)
+
+
+    - name: Check if a file exists in temp and fail task if it does
+      command: ls /tmp/this_should_not_be_here
+      register: result
+      failed_when:
+        - result.rc == 0
+        - '"No such" not in result.stdout'
+
+        - name: this command prints FAILED when it fails
+          command: /usr/bin/example-command -x -y -z
+          register: command_result
+          ignore_errors: True
+
+        - name: fail the play if the previous command did not succeed
+          fail:
+            msg: "the command failed"
+          when: "'FAILED' in command_result.stderr"
+
+          - name: Fail task when the command error output prints FAILED
+    command: /usr/bin/example-command -x -y -z
+    register: command_result
+    failed_when: "'FAILED' in command_result.stderr"
+
+ failed_when: result.rc == 0 or "No such" not in result.stdout
+
+ command: /bin/fake_command
+  register: result
+  ignore_errors: True
+  changed_when:
+    - '"ERROR" in result.stderr'
+    - result.rc == 2
+
+---------
+Setting up ansible & docker useful links.
+
+https://github.com/nickjj/ansible-docker/blob/master/tasks/main.yml
+
+
+------------
+
+Getting latest version of docker compose
+
+#!/bin/bash
+
+# get latest docker compose released tag
+COMPOSE_VERSION=$(curl -s https://api.github.com/repos/docker/compose/releases/latest | grep 'tag_name' | cut -d\" -f4)
+
+# Install docker-compose
+sh -c "curl -L https://github.com/docker/compose/releases/download/${COMPOSE_VERSION}/docker-compose-`uname -s`-`uname -m` > /usr/local/bin/docker-compose"
+chmod +x /usr/local/bin/docker-compose
+sh -c "curl -L https://raw.githubusercontent.com/docker/compose/${COMPOSE_VERSION}/contrib/completion/bash/docker-compose > /etc/bash_completion.d/docker-compose"
+
+# Output compose version
+docker-compose -v
+
+exit 0
+
+
+------------
+Monitoring containers.
+
+
+https://www.tecmint.com/ctop-monitor-docker-containers/
+
+----
+Difference between docker container
+
+containerd.io - daemon to interface with the OS API (in this case, LXC - Linux Containers), essentially decouples Docker from the OS, also provides container services for non-Docker container managers
+
+docker-ce - Docker daemon, this is the part that does all the management work, requires the other two on Linux
+
+docker-ce-cli - CLI tools to control the daemon, you can install them on their own if you want to control a remote Docker daemon

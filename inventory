@@ -1,0 +1,11 @@
+[all]
+controller-node
+broker-node
+zookeeper-node
+
+[kafka-all]
+broker-node
+zookeeper-node
+
+[broker-only]
+broker-node

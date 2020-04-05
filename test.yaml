@@ -1,0 +1,12 @@
+---
+- name: Bring up docker containers
+  hosts: broker-only
+  gather_facts: false
+  vars:
+    inventory:
+      - name: iptables_host_1
+        image: "chrismeyers/centos6"
+  roles:
+    - role: provision_docker
+      vars:
+        provision_docker_inventory : "{{inventory}}"
